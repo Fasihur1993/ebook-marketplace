@@ -1,0 +1,142 @@
+:host {
+    display: block;
+    min-height: 100vh;
+}
+
+.account-page {
+    min-height: 100vh;
+    background: #f8f6f1;
+}
+
+.account-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 6%;
+    background: #ffffff;
+    border-bottom: 1px solid #eee9df;
+}
+
+.brand {
+    color: #a17b42;
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.back-link {
+    color: #55534b;
+    font-size: 14px;
+    text-decoration: none;
+
+    &:hover {
+        color: #a17b42;
+    }
+}
+
+.account-content {
+    display: flex;
+    justify-content: center;
+    padding: 64px 20px;
+}
+
+.account-card {
+    width: 100%;
+    max-width: 560px;
+    padding: 40px;
+    border: 1px solid #eee9df;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 4%);
+}
+
+.account-heading {
+    margin-bottom: 32px;
+
+    .eyebrow {
+        color: #a17b42;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+
+    h1 {
+        margin: 12px 0;
+        color: #292820;
+        font-family: Georgia, serif;
+        font-size: 32px;
+        font-weight: 500;
+    }
+
+    p {
+        color: #77756d;
+        font-size: 14px;
+    }
+}
+
+.profile-avatar {
+    display: flex;
+    width: 64px;
+    height: 64px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    border-radius: 50%;
+    background: #f2eadb;
+    color: #8c6935;
+    font-family: Georgia, serif;
+    font-size: 28px;
+}
+
+.profile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 0;
+    border-bottom: 1px solid #eee9df;
+
+    span {
+        color: #77756d;
+        font-size: 13px;
+    }
+
+    strong {
+        color: #292820;
+        font-size: 15px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+}
+
+.logout-button {
+    width: 100%;
+    margin-top: 32px;
+    padding: 14px;
+    border: 1px solid #292820;
+    border-radius: 6px;
+    background: #292820;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+        background: #a17b42;
+        border-color: #a17b42;
+    }
+}
+
+@media (max-width: 480px) {
+    .account-header {
+        padding: 20px;
+    }
+
+    .brand {
+        font-size: 18px;
+    }
+
+    .account-card {
+        padding: 28px 22px;
+    }
+}

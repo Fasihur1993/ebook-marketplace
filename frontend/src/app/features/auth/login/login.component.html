@@ -1,0 +1,66 @@
+<div class="auth-page">
+    <div class="auth-card">
+
+        <a routerLink="/" class="brand-link">
+            Ebook Marketplace
+        </a>
+
+        <div class="auth-heading">
+            <h1>Welcome back</h1>
+            <p>Sign in to continue your reading journey.</p>
+        </div>
+
+        @if (error()) {
+        <div class="error-message" role="alert">
+            {{ error() }}
+        </div>
+        }
+
+        <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+            <div class="form-field">
+                <label for="email">Email address</label>
+
+                <input id="email" type="email" formControlName="email" placeholder="you@example.com"
+                    autocomplete="email" />
+
+                @if (
+                loginForm.controls.email.touched &&
+                loginForm.controls.email.hasError('required')
+                ) {
+                <small>Email address is required.</small>
+                }
+
+                @if (
+                loginForm.controls.email.touched &&
+                loginForm.controls.email.hasError('email')
+                ) {
+                <small>Please enter a valid email address.</small>
+                }
+            </div>
+
+            <div class="form-field">
+                <label for="password">Password</label>
+
+                <input id="password" type="password" formControlName="password" placeholder="Enter your password"
+                    autocomplete="current-password" />
+
+                @if (
+                loginForm.controls.password.touched &&
+                loginForm.controls.password.hasError('required')
+                ) {
+                <small>Password is required.</small>
+                }
+            </div>
+
+            <button type="submit" class="primary-button" [disabled]="loading()">
+                {{ loading() ? 'Signing in...' : 'Sign in' }}
+            </button>
+        </form>
+
+        <p class="auth-footer">
+            Don't have an account?
+            <a routerLink="/register">Create an account</a>
+        </p>
+
+    </div>
+</div>

@@ -1,0 +1,303 @@
+
+<app-store-header />
+
+<main class="min-h-screen bg-paper">
+
+    <!-- Hero section -->
+    <section class="relative overflow-hidden border-b border-border">
+        <div class="mx-auto grid max-w-7xl items-center gap-12 px-6 py-16 md:grid-cols-2 md:px-10 md:py-24">
+
+            <div class="max-w-xl">
+                <p class="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-brand">
+                    A bookstore for curious minds
+                </p>
+
+                <h1 class="font-display text-5xl leading-tight tracking-tight text-ink md:text-7xl">
+                    Stories that
+                    <span class="italic text-brand">stay</span>
+                    with you.
+                </h1>
+
+                <p class="mt-6 max-w-lg text-base leading-8 text-muted">
+                    Discover thoughtfully written ebooks from independent authors.
+                    Explore ideas, deepen your knowledge and find your next favourite read.
+                </p>
+
+                <a href="#collection"
+                    class="mt-8 inline-flex items-center rounded-full bg-ink px-7 py-3.5 text-sm font-medium text-white transition hover:bg-brand">
+                    Explore the collection
+                    <span class="ml-3">→</span>
+                </a>
+            </div>
+
+            <div class="relative hidden min-h-80 items-center justify-center md:flex">
+                <div class="absolute h-72 w-72 rounded-full bg-brand/10 blur-3xl"></div>
+
+                <div class="relative flex items-center gap-3">
+                    <div class="flex h-64 w-40 -rotate-12 flex-col justify-between rounded-sm bg-[#34483F] p-5 text-center text-[#F5EBDD] shadow-2xl">
+                        <span class="text-[9px] uppercase tracking-[0.3em]">The art of learning</span>
+                        <span class="font-display text-2xl">Discover</span>
+                        <span class="text-[9px] tracking-widest">A NEW PERSPECTIVE</span>
+                    </div>
+
+                    <div class="flex h-72 w-44 rotate-6 flex-col justify-between rounded-sm bg-[#A77D4B] p-5 text-center text-white shadow-2xl">
+                        <span class="text-[9px] uppercase tracking-[0.3em]">Knowledge series</span>
+                        <span class="font-display text-3xl">Wisdom</span>
+                        <span class="text-[9px] tracking-widest">WORDS THAT MATTER</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Catalogue -->
+    <section id="collection" class="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
+
+        <!-- Catalogue heading and search -->
+        <div class="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+
+            <div>
+                <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                    The bookstore
+                </p>
+
+                <h2 class="font-display text-4xl text-ink md:text-5xl">
+                    Explore our collection
+                </h2>
+
+                <p class="mt-3 text-sm text-muted">
+                    Find your next great read.
+                </p>
+            </div>
+
+            <form
+                class="flex w-full max-w-md items-center gap-2 rounded-full border border-border bg-white p-2"
+                (ngSubmit)="search()">
+
+                <input
+                    type="search"
+                    name="search"
+                    placeholder="Search ebooks..."
+                    [ngModel]="searchTerm()"
+                    (ngModelChange)="searchTerm.set($event)"
+                    class="min-w-0 flex-1 bg-transparent px-4 py-2 text-sm text-ink outline-none placeholder:text-muted" />
+
+                @if (searchTerm()) {
+                    <button
+                        type="button"
+                        (click)="clearSearch()"
+                        class="px-2 text-sm text-muted hover:text-ink"
+                        aria-label="Clear search">
+                        ✕
+                    </button>
+                }
+
+                <button
+                    type="submit"
+                    class="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-white transition hover:bg-brand">
+                    Search
+                </button>
+
+            </form>
+        </div>
+
+        <!-- Results count -->
+        <div class="mb-8 flex items-center justify-between border-b border-border pb-4">
+            <p class="text-sm text-muted">
+                @if (!loading()) {
+                    {{ totalElements() }} ebooks available
+                } @else {
+                    Discovering books...
+                }
+            </p>
+        </div>
+
+        <!-- Loading state -->
+        @if (loading()) {
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item) {
+                    <div class="animate-pulse">
+                        <div class="aspect-[3/4] rounded-sm bg-[#eae6de]"></div>
+                        <div class="mt-5 h-4 w-3/4 rounded bg-[#eae6de]"></div>
+                        <div class="mt-3 h-3 w-1/2 rounded bg-[#eae6de]"></div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Error state -->
+        @if (error()) {
+            <div class="rounded-xl border border-red-200 bg-red-50 px-6 py-10 text-center">
+                <p class="font-medium text-red-700">
+                    {{ error() }}
+                </p>
+
+                <button
+                    type="button"
+                    (click)="loadEbooks(currentPage())"
+                    class="mt-5 rounded-full bg-ink px-6 py-3 text-sm text-white hover:bg-brand">
+                    Try again
+                </button>
+            </div>
+        }
+
+        <!-- Empty state -->
+        @if (!loading() && !error() && ebooks().length === 0) {
+            <div class="rounded-xl border border-border bg-white px-6 py-20 text-center">
+
+                <p class="font-display text-3xl text-ink">
+                    No books found
+                </p>
+
+                <p class="mt-3 text-sm text-muted">
+                    Try another search to discover available ebooks.
+                </p>
+
+                @if (searchTerm()) {
+                    <button
+                        type="button"
+                        (click)="clearSearch()"
+                        class="mt-6 rounded-full bg-ink px-6 py-3 text-sm text-white hover:bg-brand">
+                        Clear search
+                    </button>
+                }
+
+            </div>
+        }
+
+        <!-- Ebook cards -->
+        @if (!loading() && !error() && ebooks().length > 0) {
+
+            <div class="grid grid-cols-1 gap-x-7 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+                @for (ebook of ebooks(); track ebook.id) {
+
+                    <article class="group min-w-0">
+
+                        <!-- Ebook cover -->
+                        <a
+                            [routerLink]="['/books', ebook.slug]"
+                            class="block overflow-hidden rounded-sm bg-[#eae6de] shadow-sm transition duration-300 group-hover:-translate-y-1 group-hover:shadow-xl">
+
+                            <div class="relative aspect-[3/4] overflow-hidden bg-[#eae6de]">
+
+                                @if (!failedCoverIds().has(ebook.id)) {
+
+                                    <!-- Actual PDF-generated cover -->
+                                    <img
+                                        [src]="ebookCoverUrl(ebook.id)"
+                                        [alt]="ebook.title + ' cover'"
+                                        (error)="onCoverError(ebook.id)"
+                                        loading="lazy"
+                                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+
+                                } @else {
+
+                                    <!-- Fallback cover -->
+                                    <div class="flex h-full flex-col justify-between bg-gradient-to-br from-[#34483F] via-[#536B5D] to-[#26372F] p-7 text-center text-[#F5EBDD]">
+
+                                        <div class="border-b border-white/20 pb-4">
+                                            <p class="text-[10px] uppercase tracking-[0.3em]">
+                                                {{ ebook.categoryName }}
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <p class="mb-4 text-xs uppercase tracking-[0.2em] text-white/60">
+                                                A thoughtful read
+                                            </p>
+
+                                            <h3 class="font-display text-3xl leading-tight">
+                                                {{ ebook.title }}
+                                            </h3>
+                                        </div>
+
+                                        <p class="text-[10px] uppercase tracking-[0.25em] text-white/60">
+                                            Digital edition
+                                        </p>
+
+                                    </div>
+                                }
+
+                            </div>
+                        </a>
+
+                        <!-- Ebook information -->
+                        <div class="pt-5">
+
+                            <p class="text-xs font-medium uppercase tracking-wider text-brand">
+                                {{ ebook.categoryName }}
+                            </p>
+
+                            <h3 class="mt-2 font-display text-2xl leading-snug text-ink transition group-hover:text-brand">
+                                <a [routerLink]="['/books', ebook.slug]">
+                                    {{ ebook.title }}
+                                </a>
+                            </h3>
+
+                            <p class="mt-3 line-clamp-2 text-sm leading-6 text-muted">
+                                {{ ebook.description }}
+                            </p>
+
+                            <div class="mt-5 flex items-center justify-between border-t border-border pt-4">
+
+                                <div>
+                                    <p class="text-xs text-muted">
+                                        {{ ebook.language }}
+
+                                        @if (ebook.pageCount) {
+                                            · {{ ebook.pageCount }} pages
+                                        }
+                                    </p>
+
+                                    <p class="mt-1 text-lg font-semibold text-ink">
+                                        {{ formatPrice(ebook.price, ebook.currency) }}
+                                    </p>
+                                </div>
+
+                                <a
+                                    [routerLink]="['/books', ebook.slug]"
+                                    class="text-sm font-semibold text-brand transition hover:text-ink">
+                                    View book →
+                                </a>
+
+                            </div>
+                        </div>
+
+                    </article>
+                }
+
+            </div>
+        }
+
+        <!-- Pagination -->
+        @if (!loading() && !error() && totalPages() > 1) {
+
+            <div class="mt-16 flex flex-wrap items-center justify-center gap-6 border-t border-border pt-8">
+
+                <button
+                    type="button"
+                    (click)="previousPage()"
+                    [disabled]="currentPage() === 0"
+                    class="rounded-full border border-border px-5 py-2.5 text-sm transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-40">
+                    ← Previous
+                </button>
+
+                <span class="text-sm text-muted">
+                    Page {{ currentPage() + 1 }} of {{ totalPages() }}
+                </span>
+
+                <button
+                    type="button"
+                    (click)="nextPage()"
+                    [disabled]="currentPage() >= totalPages() - 1"
+                    class="rounded-full border border-border px-5 py-2.5 text-sm transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-40">
+                    Next →
+                </button>
+
+            </div>
+        }
+
+    </section>
+</main>

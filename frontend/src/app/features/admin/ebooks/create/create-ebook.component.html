@@ -1,0 +1,153 @@
+<div class="mx-auto max-w-4xl">
+    <div class="mb-8">
+        <a routerLink="/admin/ebooks" class="text-sm text-[#92703a] hover:underline">
+            ← Back to ebook management
+        </a>
+
+        <h1 class="mt-4 font-display text-3xl text-[#252923]">
+            Create a new ebook
+        </h1>
+
+        <p class="mt-2 text-sm text-[#77736c]">
+            Add the ebook details. You can upload its PDF and publish it later.
+        </p>
+    </div>
+
+    @if (error()) {
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        {{ error() }}
+    </div>
+    }
+
+    <form [formGroup]="ebookForm" (ngSubmit)="submit()"
+        class="space-y-6 rounded-xl border border-[#e9e5dd] bg-white p-6 sm:p-8">
+        <div>
+            <label for="title" class="mb-2 block text-sm font-medium text-[#252923]">
+                Ebook title *
+            </label>
+
+            <input id="title" type="text" formControlName="title" maxlength="200" placeholder="Enter ebook title"
+                class="w-full rounded-lg border border-[#e9e5dd] px-4 py-3 text-sm outline-none focus:border-[#b58a45]" />
+
+            @if (ebookForm.controls.title.touched && ebookForm.controls.title.invalid) {
+            <p class="mt-1 text-xs text-red-600">
+                Please enter a title (maximum 200 characters).
+            </p>
+            }
+        </div>
+
+        <div>
+            <label for="description" class="mb-2 block text-sm font-medium text-[#252923]">
+                Description *
+            </label>
+
+            <textarea id="description" rows="5" formControlName="description"
+                placeholder="Describe what readers will learn from this ebook"
+                class="w-full rounded-lg border border-[#e9e5dd] px-4 py-3 text-sm outline-none focus:border-[#b58a45]"></textarea>
+
+            @if (ebookForm.controls.description.touched && ebookForm.controls.description.invalid) {
+            <p class="mt-1 text-xs text-red-600">
+                Description is required.
+            </p>
+            }
+        </div>
+
+        <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+                <label for="price" class="mb-2 block text-sm font-medium text-[#252923]">
+                    Price (INR) *
+                </label>
+
+                <input id="price" type="number" min="0" step="0.01" formControlName="price"
+                    class="w-full rounded-lg border border-[#e9e5dd] px-4 py-3 text-sm outline-none focus:border-[#b58a45]" />
+
+                @if (ebookForm.controls.price.touched && ebookForm.controls.price.invalid) {
+                <p class="mt-1 text-xs text-red-600">
+                    Price must be zero or greater.
+                </p>
+                }
+            </div>
+
+            <div>
+                <label for="categoryId" class="mb-2 block text-sm font-medium text-[#252923]">
+                    Category *
+                </label>
+
+                <select id="categoryId" formControlName="categoryId"
+                    class="w-full rounded-lg border border-[#e9e5dd] bg-white px-4 py-3 text-sm outline-none focus:border-[#b58a45]">
+                    <option [ngValue]="null">Select a category</option>
+
+                    @for (category of categories(); track category.id) {
+                    <option [ngValue]="category.id">
+                        {{ category.name }}
+                    </option>
+                    }
+                </select>
+
+                @if (loadingCategories()) {
+                <p class="mt-1 text-xs text-[#77736c]">Loading categories...</p>
+                }
+
+                @if (categoryError()) {
+                <p class="mt-1 text-xs text-red-600">{{ categoryError() }}</p>
+                <button type="button" (click)="loadCategories()" class="mt-1 text-xs text-[#92703a] underline">
+                    Retry
+                </button>
+                }
+
+                @if (ebookForm.controls.categoryId.touched && ebookForm.controls.categoryId.invalid) {
+                <p class="mt-1 text-xs text-red-600">
+                    Please select a category.
+                </p>
+                }
+            </div>
+
+            <div>
+                <label for="pageCount" class="mb-2 block text-sm font-medium text-[#252923]">
+                    Number of pages
+                </label>
+
+                <input id="pageCount" type="number" min="1" formControlName="pageCount" placeholder="e.g. 120"
+                    class="w-full rounded-lg border border-[#e9e5dd] px-4 py-3 text-sm outline-none focus:border-[#b58a45]" />
+
+                @if (ebookForm.controls.pageCount.touched && ebookForm.controls.pageCount.invalid) {
+                <p class="mt-1 text-xs text-red-600">
+                    Page count must be at least 1.
+                </p>
+                }
+            </div>
+
+            <div>
+                <label for="language" class="mb-2 block text-sm font-medium text-[#252923]">
+                    Language *
+                </label>
+
+                <input id="language" type="text" formControlName="language" maxlength="50" placeholder="e.g. English"
+                    class="w-full rounded-lg border border-[#e9e5dd] px-4 py-3 text-sm outline-none focus:border-[#b58a45]" />
+
+                @if (ebookForm.controls.language.touched && ebookForm.controls.language.invalid) {
+                <p class="mt-1 text-xs text-red-600">
+                    Language is required (maximum 50 characters).
+                </p>
+                }
+            </div>
+        </div>
+
+        <div class="rounded-lg bg-[#faf9f6] p-4 text-sm text-[#77736c]">
+            New ebooks are saved as <strong class="text-[#252923]">DRAFT</strong>.
+            You can upload the PDF and publish the ebook from the management area.
+        </div>
+
+        <div class="flex flex-col-reverse gap-3 border-t border-[#e9e5dd] pt-6 sm:flex-row sm:justify-end">
+            <a routerLink="/admin/ebooks"
+                class="rounded-lg border border-[#e9e5dd] px-6 py-3 text-center text-sm font-medium text-[#252923] hover:bg-[#faf9f6]">
+                Cancel
+            </a>
+
+            <button type="submit" [disabled]="submitting() || loadingCategories() || categories().length === 0"
+                class="rounded-lg bg-[#252923] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#3b4038] disabled:cursor-not-allowed disabled:opacity-50">
+                {{ submitting() ? 'Creating ebook...' : 'Create ebook' }}
+            </button>
+        </div>
+    </form>
+</div>

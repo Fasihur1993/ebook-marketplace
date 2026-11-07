@@ -1,0 +1,230 @@
+
+<app-store-header />
+
+<main class="mx-auto max-w-[1100px] px-6 py-12 pb-20 max-sm:px-4 max-sm:py-8">
+
+  <a
+    routerLink="/"
+    class="mb-9 inline-block text-sm text-[#8c6d3f] no-underline transition-colors hover:text-[#624a28]"
+  >
+    ← Back to bookstore
+  </a>
+
+  @if (loading()) {
+    <div class="px-5 py-20 text-center text-[#77746e]">
+      Loading ebook details...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="px-5 py-20 text-center text-[#b42318]">
+      <h2 class="font-serif text-2xl">Unable to display ebook</h2>
+      <p class="my-4">{{ error() }}</p>
+      <a routerLink="/" class="text-[#8c6d3f] underline">
+        Return to bookstore
+      </a>
+    </div>
+  }
+
+  @if (!loading() && !error() && ebook(); as book) {
+
+    <!-- Ebook details -->
+    <section class="grid grid-cols-[minmax(260px,380px)_1fr] items-start gap-14 max-md:grid-cols-1 max-md:gap-8">
+
+      <!-- Cover -->
+      <div class="md:sticky md:top-8">
+        <div class="relative flex min-h-[480px] items-center justify-center overflow-hidden bg-[#eee8dc] shadow-[0_18px_45px_rgba(37,37,31,0.12)] max-md:min-h-[360px]">
+
+          @if (coverLoading() && !coverError()) {
+            <span class="absolute text-sm text-[#8c6d3f]">
+              Loading cover...
+            </span>
+          }
+
+          @if (!coverError()) {
+            <img
+              [src]="coverUrl()"
+              [alt]="book.title + ' cover'"
+              class="block h-auto max-h-[560px] w-full object-contain"
+              (load)="coverLoading.set(false)"
+              (error)="coverLoading.set(false); coverError.set(true)"
+            />
+          }
+
+          @if (coverError()) {
+            <div class="flex flex-col items-center gap-3 font-serif text-3xl tracking-[5px] text-[#a88754]">
+              <span>BOOK</span>
+              <small class="font-sans text-xs tracking-normal">
+                Cover unavailable
+              </small>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Information -->
+      <div>
+        <p class="text-[13px] font-bold uppercase tracking-wider text-[#a88754]">
+          {{ book.categoryName }}
+        </p>
+
+        <h1 class="my-4 font-serif text-[clamp(32px,5vw,46px)] font-normal leading-tight text-[#25251f]">
+          {{ book.title }}
+        </h1>
+
+        <p class="whitespace-pre-line text-base leading-[1.8] text-[#77746e]">
+          {{ book.description || 'No description available.' }}
+        </p>
+
+        <!-- Metadata -->
+        <div class="my-8 flex flex-wrap gap-8 border-y border-[#e9e5dc] py-6">
+          <div class="flex flex-col gap-2">
+            <span class="text-xs text-[#77746e]">Language</span>
+            <strong class="text-sm">{{ book.language }}</strong>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <span class="text-xs text-[#77746e]">Pages</span>
+            <strong class="text-sm">
+              {{ book.pageCount ?? 'Not specified' }}
+            </strong>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <span class="text-xs text-[#77746e]">Format</span>
+            <strong class="text-sm">PDF</strong>
+          </div>
+        </div>
+
+        <!-- Purchase -->
+        <div class="py-6">
+          <p class="mb-5 text-[28px] font-bold">
+            {{ formatPrice(book.price, book.currency) }}
+          </p>
+
+          <button
+            type="button"
+            disabled
+            class="w-full max-w-80 cursor-not-allowed border-0 bg-[#8c6d3f] px-6 py-4 text-sm font-semibold text-white opacity-65"
+          >
+            Purchase ebook
+          </button>
+
+          <p class="mt-4 text-[13px] leading-relaxed text-[#77746e]">
+            Secure digital purchase and download functionality coming next.
+          </p>
+        </div>
+
+        <!-- About -->
+        <div class="mt-6">
+          <h2 class="font-serif text-2xl font-normal">
+            About this ebook
+          </h2>
+
+          <p class="mt-4 leading-[1.8] text-[#77746e]">
+            {{ book.description || 'No additional information available.' }}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Preview gallery -->
+    <section class="mt-24 border-t border-[#e9e5dc] pt-12 max-sm:mt-16">
+
+      <div class="mb-8">
+        <p class="text-[11px] font-bold tracking-[2px] text-[#a88754]">
+          TAKE A LOOK INSIDE
+        </p>
+
+        <h2 class="my-3 font-serif text-[34px] font-normal max-sm:text-[28px]">
+          Book previews
+        </h2>
+
+        <p class="text-sm text-[#77746e]">
+          Explore a few sample pages before purchasing this ebook.
+        </p>
+      </div>
+
+      @if (previewsLoading()) {
+        <div class="bg-[#f3f0e9] p-8 text-center text-sm text-[#77746e]">
+          Loading sample pages...
+        </div>
+      }
+
+      @if (previewsError()) {
+        <div class="bg-[#f3f0e9] p-8 text-center text-sm text-[#77746e]">
+          Preview images are currently unavailable.
+        </div>
+      }
+
+      @if (!previewsLoading() && !previewsError() && previews().length === 0) {
+        <div class="bg-[#f3f0e9] p-8 text-center text-sm text-[#77746e]">
+          No preview pages are available for this ebook.
+        </div>
+      }
+
+      @if (previews().length > 0) {
+        <div class="grid grid-cols-3 gap-6 max-md:grid-cols-2 max-sm:grid-cols-1 max-sm:gap-4">
+
+          @for (preview of previews(); track preview.pageNumber) {
+            <button
+              type="button"
+              class="group flex cursor-pointer flex-col gap-3 border border-[#e9e5dc] bg-white p-3 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(37,37,31,0.10)]"
+              (click)="openPreview(preview)"
+              [attr.aria-label]="'Enlarge page ' + preview.pageNumber"
+            >
+              <img
+                [src]="preview.imageUrl"
+                [alt]="'Preview page ' + preview.pageNumber"
+                loading="lazy"
+                class="h-[260px] w-full bg-[#f3f0e9] object-contain max-sm:h-[280px]"
+              />
+
+              <span class="text-[13px] text-[#77746e]">
+                Page {{ preview.pageNumber }}
+              </span>
+            </button>
+          }
+
+        </div>
+      }
+    </section>
+
+    <!-- Enlarged preview modal -->
+    @if (selectedPreview(); as preview) {
+      <div
+        class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 p-6"
+        (click)="closePreview()"
+        (keydown.escape)="closePreview()"
+        role="presentation"
+      >
+        <div
+          class="relative flex max-h-[90vh] max-w-[700px] flex-col items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Ebook page preview"
+          (click)="$event.stopPropagation()"
+        >
+          <button
+            type="button"
+            class="absolute -right-4 -top-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-2xl text-[#25251f] hover:bg-[#eee8dc]"
+            aria-label="Close preview"
+            (click)="closePreview()"
+          >
+            ×
+          </button>
+
+          <img
+            [src]="preview.imageUrl"
+            [alt]="'Preview page ' + preview.pageNumber"
+            class="max-h-[78vh] max-w-full bg-white object-contain"
+          />
+
+          <p class="mt-3 text-[13px] text-white">
+            Page {{ preview.pageNumber }}
+          </p>
+        </div>
+      </div>
+    }
+  }
+</main>

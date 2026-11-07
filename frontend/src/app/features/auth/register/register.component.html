@@ -1,0 +1,103 @@
+<div class="auth-page">
+    <div class="auth-card">
+
+        <a routerLink="/" class="brand-link">
+            Ebook Marketplace
+        </a>
+
+        @if (registrationSuccess()) {
+        <div class="success-state">
+            <div class="success-icon">✓</div>
+
+            <h1>Account created!</h1>
+
+            <p>
+                Your account has been registered successfully.
+                You can now sign in to explore our bookstore.
+            </p>
+
+            <a routerLink="/login" class="primary-button">
+                Continue to login
+            </a>
+        </div>
+        } @else {
+        <div class="auth-heading">
+            <h1>Create your account</h1>
+            <p>Join our reading community.</p>
+        </div>
+
+        @if (error()) {
+        <div class="error-message" role="alert">
+            {{ error() }}
+        </div>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="submit()" novalidate>
+            <div class="form-field">
+                <label for="fullName">Full name</label>
+
+                <input id="fullName" type="text" formControlName="fullName" placeholder="Enter your full name"
+                    autocomplete="name" />
+
+                @if (
+                registerForm.controls.fullName.touched &&
+                registerForm.controls.fullName.hasError('required')
+                ) {
+                <small>Please enter your full name.</small>
+                }
+
+                @if (
+                registerForm.controls.fullName.touched &&
+                registerForm.controls.fullName.hasError('maxlength')
+                ) {
+                <small>Name cannot exceed 100 characters.</small>
+                }
+            </div>
+
+            <div class="form-field">
+                <label for="email">Email address</label>
+
+                <input id="email" type="email" formControlName="email" placeholder="you@example.com"
+                    autocomplete="email" />
+
+                @if (
+                registerForm.controls.email.touched &&
+                registerForm.controls.email.hasError('required')
+                ) {
+                <small>Email address is required.</small>
+                }
+
+                @if (
+                registerForm.controls.email.touched &&
+                registerForm.controls.email.hasError('email')
+                ) {
+                <small>Please enter a valid email address.</small>
+                }
+            </div>
+
+            <div class="form-field">
+                <label for="password">Password</label>
+
+                <input id="password" type="password" formControlName="password" placeholder="Create a password"
+                    autocomplete="new-password" />
+
+                @if (
+                registerForm.controls.password.touched &&
+                registerForm.controls.password.hasError('required')
+                ) {
+                <small>Password is required.</small>
+                }
+            </div>
+
+            <button type="submit" class="primary-button" [disabled]="loading()">
+                {{ loading() ? 'Creating account...' : 'Create account' }}
+            </button>
+        </form>
+
+        <p class="auth-footer">
+            Already have an account?
+            <a routerLink="/login">Sign in</a>
+        </p>
+        }
+    </div>
+</div>

@@ -1,0 +1,171 @@
+:host {
+    display: block;
+}
+
+.store-header {
+    position: relative;
+    z-index: 20;
+    background: #fffefa;
+    border-bottom: 1px solid #eee9df;
+}
+
+.header-container {
+    width: min(1200px, calc(100% - 48px));
+    min-height: 84px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: #25251f;
+    text-decoration: none;
+}
+
+.brand-mark {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    background: #b28a48;
+    color: #fff;
+    font-family: Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+    border-radius: 50%;
+}
+
+.brand-name {
+    font-family: Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.desktop-navigation,
+.desktop-actions {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.desktop-navigation a,
+.login-link,
+.account-link {
+    color: #55534c;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 160ms ease;
+}
+
+.desktop-navigation a:hover,
+.desktop-navigation a.active,
+.login-link:hover,
+.account-link:hover {
+    color: #a47a36;
+}
+
+.register-button,
+.logout-button {
+    padding: 12px 20px;
+    border: 1px solid #b28a48;
+    border-radius: 4px;
+    background: #b28a48;
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 160ms ease;
+}
+
+.register-button:hover,
+.logout-button:hover {
+    background: #967039;
+}
+
+.logout-button {
+    background: transparent;
+    color: #8b6a35;
+}
+
+.logout-button:hover {
+    background: #f6f0e5;
+    color: #755526;
+}
+
+.mobile-menu-button,
+.mobile-navigation {
+    display: none;
+}
+
+@media (max-width: 720px) {
+    .header-container {
+        width: calc(100% - 32px);
+        min-height: 72px;
+    }
+
+    .brand-name {
+        font-size: 17px;
+    }
+
+    .desktop-navigation,
+    .desktop-actions {
+        display: none;
+    }
+
+    .mobile-menu-button {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        border: 1px solid #e8e1d5;
+        border-radius: 4px;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .mobile-menu-button span {
+        width: 18px;
+        height: 2px;
+        background: #333129;
+    }
+
+    .mobile-navigation {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        padding: 8px 16px 16px;
+        border-top: 1px solid #eee9df;
+        background: #fffefa;
+    }
+
+    .mobile-navigation a,
+    .mobile-navigation button {
+        padding: 14px 8px;
+        border: 0;
+        border-bottom: 1px solid #f0ece4;
+        background: transparent;
+        color: #45433c;
+        font: inherit;
+        font-size: 14px;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .mobile-navigation a:last-child,
+    .mobile-navigation button:last-child {
+        border-bottom: 0;
+    }
+}

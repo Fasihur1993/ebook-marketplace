@@ -1,0 +1,115 @@
+<div class="min-h-screen bg-[#f7f6f3]">
+
+    <!-- Mobile overlay -->
+    @if (isMobileMenuOpen()) {
+    <div class="fixed inset-0 z-40 bg-black/40 lg:hidden" (click)="closeMobileMenu()"></div>
+    }
+
+    <!-- Sidebar -->
+    <aside
+        class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-[#252923] text-white transition-transform duration-300 lg:translate-x-0"
+        [class.-translate-x-full]="!isMobileMenuOpen()">
+
+        <!-- Brand -->
+        <div class="flex h-20 items-center justify-between border-b border-white/10 px-6">
+            <a routerLink="/" class="font-display text-2xl tracking-wide">
+                Book<span class="text-[#c5a16b]">store</span>
+            </a>
+
+            <button type="button" class="text-2xl text-white lg:hidden" (click)="closeMobileMenu()"
+                aria-label="Close navigation">
+                &times;
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 space-y-2 px-4 py-8">
+
+            <p class="mb-4 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+                Workspace
+            </p>
+
+            <a routerLink="/admin" [routerLinkActiveOptions]="{ exact: true }"
+                routerLinkActive="!bg-[#c5a16b] !text-[#252923]" (click)="closeMobileMenu()"
+                class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-white/70 transition hover:bg-white/10 hover:text-white">
+                <span>▦</span>
+                Dashboard
+            </a>
+
+            <div class="mt-8">
+                <p class="mb-4 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+                    Catalogue
+                </p>
+
+            <a routerLink="/admin/ebooks" routerLinkActive="!bg-[#c5a16b] !text-[#252923]" (click)="closeMobileMenu()"
+                class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-white/70 transition hover:bg-white/10 hover:text-white">
+                <span>▤</span>
+                Ebook management
+            </a>
+            <a routerLink="/admin/categories" routerLinkActive="bg-white/10 text-white" [routerLinkActiveOptions]="{ exact: true }"
+                class="block rounded-lg px-4 py-3 text-sm text-gray-300 transition hover:bg-white/10 hover:text-white">
+                <span>▤</span>
+                Category Management
+            </a>
+            </div>
+
+        </nav>
+
+        <!-- Sidebar footer -->
+        <div class="border-t border-white/10 p-5">
+            <a routerLink="/"
+                class="block rounded-lg px-3 py-2 text-sm text-white/60 transition hover:bg-white/10 hover:text-white">
+                ← Back to bookstore
+            </a>
+
+            <button type="button" (click)="logout()"
+                class="mt-2 w-full rounded-lg px-3 py-2 text-left text-sm text-white/60 transition hover:bg-white/10 hover:text-white">
+                Sign out
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- Main area -->
+    <div class="min-h-screen lg:pl-64">
+
+        <!-- Top navigation -->
+        <header
+            class="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-[#e8e5df] bg-white px-5 md:px-8">
+
+            <div class="flex items-center gap-4">
+                <button type="button" (click)="toggleMobileMenu()" class="text-2xl text-[#252923] lg:hidden"
+                    aria-label="Open navigation">
+                    ☰
+                </button>
+
+                <div>
+                    <p class="text-xs text-[#99958d]">Bookstore administration</p>
+                    <p class="text-sm font-semibold text-[#252923]">Admin workspace</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="hidden text-right sm:block">
+                    <p class="text-sm font-semibold text-[#252923]">
+                        {{ currentUser()?.email }}
+                    </p>
+                    <p class="text-xs text-[#99958d]">Administrator</p>
+                </div>
+
+                <div
+                    class="flex h-10 w-10 items-center justify-center rounded-full bg-[#252923] text-sm font-semibold text-white">
+                    A
+                </div>
+            </div>
+
+        </header>
+
+        <!-- Page content -->
+        <main class="mx-auto max-w-7xl px-5 py-8 md:px-8 md:py-10">
+            <router-outlet />
+        </main>
+
+    </div>
+
+</div>

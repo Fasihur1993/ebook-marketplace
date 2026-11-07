@@ -1,0 +1,55 @@
+
+# ==========================================
+# IDE and editor files
+# ==========================================
+.vscode/
+.idea/
+*.iml
+*.iws
+
+# ==========================================
+# Environment files and secrets
+# ==========================================
+.env
+.env.*
+!.env.example
+!.env.sample
+
+**/application-local.properties
+**/application-secret.properties
+**/application-prod.properties
+
+*.pem
+*.key
+*.p12
+*.jks
+
+# ==========================================
+# Backend - Java / Maven
+# ==========================================
+**/target/
+**/build/
+
+# Private ebook storage - NEVER COMMIT
+**/private-storage/
+
+# ==========================================
+# Frontend - Angular / Node
+# ==========================================
+**/node_modules/
+**/.angular/
+**/dist/
+**/coverage/
+
+# ==========================================
+# Generated files
+# ==========================================
+*.log
+.DS_Store
+Thumbs.db
+
+# Generated ebook cover in project root
+/ebook-5-cover.png
+
+# Test PDFs - keep out of the initial commit
+/test-files/*.pdf

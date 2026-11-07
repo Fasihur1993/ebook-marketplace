@@ -1,0 +1,46 @@
+<div class="account-page">
+    <header class="account-header">
+        <a routerLink="/" class="brand">Ebook Marketplace</a>
+
+        <a routerLink="/" class="back-link">
+            Back to bookstore
+        </a>
+    </header>
+
+    <main class="account-content">
+        <section class="account-card">
+            <div class="account-heading">
+                <span class="eyebrow">MY ACCOUNT</span>
+                <h1>Welcome back</h1>
+                <p>Manage your bookstore account.</p>
+            </div>
+
+            @if (currentUser(); as user) {
+            <div class="profile-details">
+                <div class="profile-avatar">
+                    {{ user.email.charAt(0).toUpperCase() }}
+                </div>
+
+                <div class="profile-field">
+                    <span>Account ID</span>
+                    <strong>{{ user.id }}</strong>
+                </div>
+
+                <div class="profile-field">
+                    <span>Email address</span>
+                    <strong>{{ user.email }}</strong>
+                </div>
+
+                <div class="profile-field">
+                    <span>Account role</span>
+                    <strong>{{ user.role }}</strong>
+                </div>
+            </div>
+            }
+
+            <button type="button" class="logout-button" (click)="logout()">
+                Sign out
+            </button>
+        </section>
+    </main>
+</div>

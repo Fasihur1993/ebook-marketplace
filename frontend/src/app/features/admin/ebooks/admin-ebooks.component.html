@@ -1,0 +1,375 @@
+<div>
+  <!-- Heading -->
+  <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div>
+      <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#b58a45]">Catalogue</p>
+
+      <h1 class="font-display text-4xl text-[#252923]">Ebook management</h1>
+
+      <p class="mt-3 text-sm text-[#77736c]">
+        Manage your ebooks, review their status and control publishing.
+      </p>
+    </div>
+
+    <div class="rounded-lg border border-[#e8e5df] bg-white px-4 py-3">
+      <p class="text-xs text-[#99958d]">Total ebooks</p>
+      <p class="mt-1 text-2xl font-semibold text-[#252923]">
+        {{ totalElements() }}
+      </p>
+    </div>
+  </div>
+
+  <a
+    routerLink="/admin/ebooks/create"
+    class="inline-flex items-center rounded-lg bg-[#252923] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#3b4038]"
+  >
+    + Create ebook
+  </a>
+
+  <!-- Error -->
+  @if (error()) {
+    <div
+      class="mb-6 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4"
+    >
+      <p class="text-sm text-red-700">{{ error() }}</p>
+
+      <button
+        type="button"
+        (click)="loadEbooks(currentPage())"
+        class="text-sm font-semibold text-red-700 hover:underline"
+      >
+        Retry
+      </button>
+    </div>
+  }
+
+  @if (ebookToPublish(); as ebook) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      role="presentation"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="publish-modal-title"
+        class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-8"
+      >
+        <div
+          class="mb-5 flex size-12 items-center justify-center rounded-full bg-[#f5efe3] text-[#92703a]"
+        >
+          <span class="text-2xl">↗</span>
+        </div>
+
+        <h2 id="publish-modal-title" class="font-display text-2xl text-[#25231f]">
+          Publish this ebook?
+        </h2>
+
+        <p class="mt-3 text-sm leading-6 text-[#77736c]">
+          You are about to publish
+          <strong class="font-semibold text-[#25231f]">
+            {{ ebook.title }} </strong
+          >. Once published, it will become visible to customers in the public bookstore.
+        </p>
+
+        <div class="mt-6 rounded-lg bg-[#faf9f6] p-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-[#77736c]">
+            Publishing status
+          </p>
+          <p class="mt-1 text-sm font-medium text-[#25231f]">Draft → Published</p>
+        </div>
+
+        @if (publishError()) {
+          <p role="alert" class="mt-4 text-sm text-red-600">
+            {{ publishError() }}
+          </p>
+        }
+
+        <div class="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            (click)="cancelPublish()"
+            [disabled]="publishingEbookId() !== null"
+            class="rounded-lg border border-[#e9e5dd] px-5 py-3 text-sm font-semibold text-[#25231f] transition hover:bg-[#faf9f6] disabled:opacity-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            (click)="publishEbook()"
+            [disabled]="publishingEbookId() !== null"
+            class="rounded-lg bg-[#252923] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#3b4038] disabled:opacity-50"
+          >
+            {{ publishingEbookId() !== null ? 'Publishing...' : 'Confirm publish' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Table -->
+  <div class="overflow-hidden rounded-xl border border-[#e8e5df] bg-white">
+    <div class="border-b border-[#e8e5df] px-6 py-5">
+      <h2 class="font-semibold text-[#252923]">All ebooks</h2>
+      <p class="mt-1 text-xs text-[#99958d]">
+        Your complete ebook catalogue, including drafts and published books.
+      </p>
+    </div>
+
+    @if (loading()) {
+      <div class="space-y-4 p-6">
+        @for (item of [1, 2, 3, 4, 5]; track item) {
+          <div class="h-12 animate-pulse rounded-lg bg-[#f2f0eb]"></div>
+        }
+      </div>
+    } @else if (!error() && ebooks().length === 0) {
+      <div class="px-6 py-20 text-center">
+        <h3 class="font-display text-2xl text-[#252923]">No ebooks yet</h3>
+        <p class="mt-2 text-sm text-[#77736c]">Your ebooks will appear here once created.</p>
+      </div>
+    } @else if (!error()) {
+      <div class="overflow-x-auto">
+        @if (uploadError()) {
+          <div
+            role="alert"
+            class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {{ uploadError() }}
+          </div>
+        }
+
+        @if (uploadSuccess()) {
+          <div
+            role="status"
+            class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+          >
+            {{ uploadSuccess() }}
+          </div>
+        }
+
+        @if (publishError()) {
+          <div
+            role="alert"
+            class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {{ publishError() }}
+          </div>
+        }
+
+        @if (publishSuccess()) {
+          <div
+            role="status"
+            class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+          >
+            {{ publishSuccess() }}
+          </div>
+        }
+        <table class="w-full min-w-[750px] text-left">
+          <thead class="bg-[#faf9f6]">
+            <tr class="text-xs uppercase tracking-wider text-[#99958d]">
+              <th class="px-6 py-4 font-medium">Ebook</th>
+              <th class="px-6 py-4 font-medium">Category</th>
+              <th class="px-6 py-4 font-medium">Price</th>
+              <th class="px-6 py-4 font-medium">Status</th>
+              <th class="px-6 py-4 font-medium">Created</th>
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[#77736c]"
+              >
+                PDF
+              </th>
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[#77736c]"
+              >
+                Publishing
+              </th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-[#eeeae3]">
+            @for (ebook of ebooks(); track ebook.id) {
+              <tr class="transition hover:bg-[#faf9f6]">
+                <td class="px-6 py-5">
+                  <div class="font-medium text-[#252923]">
+                    {{ ebook.title }}
+                  </div>
+                  <div class="mt-1 text-xs text-[#99958d]">ID: {{ ebook.id }}</div>
+                </td>
+
+                <td class="px-6 py-5 text-sm text-[#77736c]">
+                  {{ ebook.categoryName }}
+                </td>
+
+                <td class="px-6 py-5 text-sm font-medium text-[#252923]">
+                  {{ formatPrice(ebook.price, ebook.currency) }}
+                </td>
+
+                <td class="px-6 py-5">
+                  @if (ebook.status === 'PUBLISHED') {
+                    <span
+                      class="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700"
+                    >
+                      Published
+                    </span>
+                  } @else if (ebook.status === 'UNPUBLISHED') {
+                    <span
+                      class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600"
+                    >
+                      Unpublished
+                    </span>
+                  } @else {
+                    <span
+                      class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
+                    >
+                      Draft
+                    </span>
+                  }
+                </td>
+
+                <td class="px-6 py-5 text-sm text-[#77736c]">
+                  {{ ebook.createdAt | date: 'dd MMM yyyy' }}
+                </td>
+                <td class="px-6 py-4">
+                  @if (ebook.pdfUploaded) {
+                    <span class="text-sm font-medium text-green-700"> PDF uploaded </span>
+                  } @else {
+                    <input
+                      #pdfInput
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      class="hidden"
+                      (change)="onPdfSelected($event, ebook)"
+                    />
+
+                    <button
+                      type="button"
+                      [disabled]="uploadingEbookId() === ebook.id"
+                      (click)="pdfInput.click()"
+                      class="rounded-lg bg-[#252923] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#3b4038] disabled:opacity-50"
+                    >
+                      {{ uploadingEbookId() === ebook.id ? 'Uploading...' : 'Upload PDF' }}
+                    </button>
+                  }
+                </td>
+                <td class="px-6 py-4">
+                  @if (ebook.status === 'PUBLISHED') {
+                    <button
+                      type="button"
+                      (click)="confirmUnpublish(ebook)"
+                      [disabled]="unpublishingEbookId() === ebook.id"
+                      class="font-semibold text-red-600 hover:underline disabled:opacity-50"
+                    >
+                      Unpublish
+                    </button>
+                  } @else if (ebook.pdfUploaded) {
+                    <button
+                      type="button"
+                      (click)="confirmPublish(ebook)"
+                      [disabled]="publishingEbookId() === ebook.id"
+                      class="font-semibold text-brand-dark hover:underline disabled:opacity-50"
+                    >
+                      Publish
+                    </button>
+                  } @else {
+                    <span class="text-xs text-muted">Upload PDF first</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div
+          class="flex flex-wrap items-center justify-between gap-4 border-t border-[#e8e5df] px-6 py-5"
+        >
+          <p class="text-sm text-[#77736c]">Page {{ currentPage() + 1 }} of {{ totalPages() }}</p>
+
+          <div class="flex gap-2">
+            <button
+              type="button"
+              (click)="previousPage()"
+              [disabled]="currentPage() === 0"
+              class="rounded-lg border border-[#e8e5df] px-4 py-2 text-sm transition hover:border-[#b58a45] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+
+            <button
+              type="button"
+              (click)="nextPage()"
+              [disabled]="currentPage() >= totalPages() - 1"
+              class="rounded-lg border border-[#e8e5df] px-4 py-2 text-sm transition hover:border-[#b58a45] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+
+@if (ebookToUnpublish(); as ebook) {
+  <div
+    class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+    (click)="cancelUnpublish()"
+  >
+    <section
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="unpublish-modal-title"
+      class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
+        <span class="text-xl font-bold text-red-600">!</span>
+      </div>
+
+      <h2
+        id="unpublish-modal-title"
+        class="font-display text-2xl font-semibold text-ink"
+      >
+        Unpublish Ebook?
+      </h2>
+
+      <p class="mt-3 text-sm leading-6 text-muted">
+        Are you sure you want to unpublish
+        <strong class="text-ink">{{ ebook.title }}</strong>?
+      </p>
+
+      <p class="mt-3 text-sm leading-6 text-muted">
+        This ebook will no longer appear in the public bookstore.
+        Its uploaded PDF will be retained, and you can publish it again later.
+      </p>
+
+      @if (unpublishError()) {
+        <div class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          {{ unpublishError() }}
+        </div>
+      }
+
+      <div class="mt-7 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="cancelUnpublish()"
+          [disabled]="unpublishingEbookId() !== null"
+          class="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink hover:bg-paper disabled:opacity-50"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          (click)="unpublishEbook()"
+          [disabled]="unpublishingEbookId() !== null"
+          class="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+        >
+          {{ unpublishingEbookId() !== null ? 'Unpublishing...' : 'Yes, Unpublish' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}
