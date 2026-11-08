@@ -1,0 +1,16 @@
+:host {
+    display: block;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    transition: all 150ms ease;
+}
+
+button:focus-visible {
+    outline: 2px solid #a17b48;
+    outline-offset: 2px;
+}

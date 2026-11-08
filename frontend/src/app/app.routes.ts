@@ -14,6 +14,8 @@ import { CreateEbookComponent } from './features/admin/ebooks/create/create-eboo
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { CategoryManagementComponent } from './features/admin/categories/category-management.component';
+import { CustomerOrdersComponent } from './features/account/orders/customer-orders.component';
+import { AdminPaymentsComponent } from './features/payments/admin-payments.component';
 
 export const routes: Routes = [
   {
@@ -39,6 +41,12 @@ export const routes: Routes = [
     data: { roles: ['CUSTOMER', 'ADMIN'] },
   },
   {
+    path: 'account/orders',
+    component: CustomerOrdersComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['CUSTOMER', 'ADMIN'] },
+  },
+  {
     path: 'admin',
     component: AdminLayoutComponent,
     canActivate: [authGuard, roleGuard],
@@ -59,6 +67,10 @@ export const routes: Routes = [
       {
         path: 'categories',
         component: CategoryManagementComponent,
+      },
+      {
+        path: 'payments',
+        component: AdminPaymentsComponent,
       },
     ],
   },
