@@ -3,9 +3,7 @@
   <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
     <div>
       <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#b58a45]">Catalogue</p>
-
       <h1 class="font-display text-4xl text-[#252923]">Ebook management</h1>
-
       <p class="mt-3 text-sm text-[#77736c]">
         Manage your ebooks, review their status and control publishing.
       </p>
@@ -29,10 +27,9 @@
   <!-- Error -->
   @if (error()) {
     <div
-      class="mb-6 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4"
+      class="mb-6 mt-6 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4"
     >
       <p class="text-sm text-red-700">{{ error() }}</p>
-
       <button
         type="button"
         (click)="loadEbooks(currentPage())"
@@ -43,10 +40,10 @@
     </div>
   }
 
+  <!-- Publish confirmation -->
   @if (ebookToPublish(); as ebook) {
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-      role="presentation"
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
     >
       <div
         role="dialog"
@@ -66,8 +63,7 @@
 
         <p class="mt-3 text-sm leading-6 text-[#77736c]">
           You are about to publish
-          <strong class="font-semibold text-[#25231f]">
-            {{ ebook.title }} </strong
+          <strong class="font-semibold text-[#25231f]">{{ ebook.title }}</strong
           >. Once published, it will become visible to customers in the public bookstore.
         </p>
 
@@ -76,6 +72,7 @@
             Publishing status
           </p>
           <p class="mt-1 text-sm font-medium text-[#25231f]">Draft → Published</p>
+          <p class="mt-2 text-xs text-green-700">PDF review completed.</p>
         </div>
 
         @if (publishError()) {
@@ -107,8 +104,8 @@
     </div>
   }
 
-  <!-- Table -->
-  <div class="overflow-hidden rounded-xl border border-[#e8e5df] bg-white">
+  <!-- Ebook table -->
+  <div class="mt-6 overflow-hidden rounded-xl border border-[#e8e5df] bg-white">
     <div class="border-b border-[#e8e5df] px-6 py-5">
       <h2 class="font-semibold text-[#252923]">All ebooks</h2>
       <p class="mt-1 text-xs text-[#99958d]">
@@ -132,7 +129,7 @@
         @if (uploadError()) {
           <div
             role="alert"
-            class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            class="m-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
           >
             {{ uploadError() }}
           </div>
@@ -141,7 +138,7 @@
         @if (uploadSuccess()) {
           <div
             role="status"
-            class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+            class="m-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
           >
             {{ uploadSuccess() }}
           </div>
@@ -150,7 +147,7 @@
         @if (publishError()) {
           <div
             role="alert"
-            class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            class="m-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
           >
             {{ publishError() }}
           </div>
@@ -159,12 +156,49 @@
         @if (publishSuccess()) {
           <div
             role="status"
-            class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+            class="m-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
           >
             {{ publishSuccess() }}
           </div>
         }
-        <table class="w-full min-w-[750px] text-left">
+
+        @if (suspendSuccess()) {
+          <div
+            role="status"
+            class="m-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {{ suspendSuccess() }}
+          </div>
+        }
+
+        @if (restoreSuccess()) {
+          <div
+            role="status"
+            class="m-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+          >
+            {{ restoreSuccess() }}
+          </div>
+        }
+
+        @if (suspendError()) {
+          <div
+            role="alert"
+            class="m-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {{ suspendError() }}
+          </div>
+        }
+
+        @if (restoreError()) {
+          <div
+            role="alert"
+            class="m-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {{ restoreError() }}
+          </div>
+        }
+
+        <table class="w-full min-w-[850px] text-left">
           <thead class="bg-[#faf9f6]">
             <tr class="text-xs uppercase tracking-wider text-[#99958d]">
               <th class="px-6 py-4 font-medium">Ebook</th>
@@ -172,16 +206,8 @@
               <th class="px-6 py-4 font-medium">Price</th>
               <th class="px-6 py-4 font-medium">Status</th>
               <th class="px-6 py-4 font-medium">Created</th>
-              <th
-                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[#77736c]"
-              >
-                PDF
-              </th>
-              <th
-                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[#77736c]"
-              >
-                Publishing
-              </th>
+              <th class="px-6 py-4 font-medium">PDF</th>
+              <th class="px-6 py-4 font-medium">Publishing</th>
             </tr>
           </thead>
 
@@ -189,9 +215,7 @@
             @for (ebook of ebooks(); track ebook.id) {
               <tr class="transition hover:bg-[#faf9f6]">
                 <td class="px-6 py-5">
-                  <div class="font-medium text-[#252923]">
-                    {{ ebook.title }}
-                  </div>
+                  <div class="font-medium text-[#252923]">{{ ebook.title }}</div>
                   <div class="mt-1 text-xs text-[#99958d]">ID: {{ ebook.id }}</div>
                 </td>
 
@@ -216,6 +240,12 @@
                     >
                       Unpublished
                     </span>
+                  } @else if (ebook.status === 'SUSPENDED') {
+                    <span
+                      class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700"
+                    >
+                      Suspended
+                    </span>
                   } @else {
                     <span
                       class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
@@ -228,9 +258,24 @@
                 <td class="px-6 py-5 text-sm text-[#77736c]">
                   {{ ebook.createdAt | date: 'dd MMM yyyy' }}
                 </td>
+
                 <td class="px-6 py-4">
                   @if (ebook.pdfUploaded) {
-                    <span class="text-sm font-medium text-green-700"> PDF uploaded </span>
+                    <div class="flex flex-col items-start gap-2">
+                      <span class="text-sm font-medium text-green-700"> PDF uploaded </span>
+
+                      <button
+                        type="button"
+                        (click)="reviewPdf(ebook)"
+                        class="text-xs font-semibold text-[#92703a] hover:underline"
+                      >
+                        Review PDF
+                      </button>
+
+                      @if (reviewedEbookIds().has(ebook.id)) {
+                        <span class="text-xs text-green-700"> ✓ Reviewed </span>
+                      }
+                    </div>
                   } @else {
                     <input
                       #pdfInput
@@ -250,28 +295,57 @@
                     </button>
                   }
                 </td>
+
                 <td class="px-6 py-4">
-                  @if (ebook.status === 'PUBLISHED') {
-                    <button
-                      type="button"
-                      (click)="confirmUnpublish(ebook)"
-                      [disabled]="unpublishingEbookId() === ebook.id"
-                      class="font-semibold text-red-600 hover:underline disabled:opacity-50"
-                    >
-                      Unpublish
-                    </button>
-                  } @else if (ebook.pdfUploaded) {
-                    <button
-                      type="button"
-                      (click)="confirmPublish(ebook)"
-                      [disabled]="publishingEbookId() === ebook.id"
-                      class="font-semibold text-brand-dark hover:underline disabled:opacity-50"
-                    >
-                      Publish
-                    </button>
-                  } @else {
-                    <span class="text-xs text-muted">Upload PDF first</span>
-                  }
+                  <div class="flex flex-col items-start gap-3">
+                    @if (ebook.status === 'SUSPENDED') {
+                      <button
+                        type="button"
+                        (click)="confirmRestore(ebook)"
+                        [disabled]="restoringEbookId() === ebook.id"
+                        class="font-semibold text-green-700 hover:underline disabled:opacity-50"
+                      >
+                        {{ restoringEbookId() === ebook.id ? 'Restoring...' : 'Restore' }}
+                      </button>
+                    } @else {
+                      @if (ebook.status === 'PUBLISHED') {
+                        <button
+                          type="button"
+                          (click)="confirmUnpublish(ebook)"
+                          [disabled]="unpublishingEbookId() === ebook.id"
+                          class="font-semibold text-red-600 hover:underline disabled:opacity-50"
+                        >
+                          {{ unpublishingEbookId() === ebook.id ? 'Unpublishing...' : 'Unpublish' }}
+                        </button>
+                      } @else if (ebook.pdfUploaded && reviewedEbookIds().has(ebook.id)) {
+                        <button
+                          type="button"
+                          (click)="confirmPublish(ebook)"
+                          [disabled]="publishingEbookId() === ebook.id"
+                          class="font-semibold text-brand-dark hover:underline disabled:opacity-50"
+                        >
+                          {{ publishingEbookId() === ebook.id ? 'Publishing...' : 'Publish' }}
+                        </button>
+                      } @else if (ebook.pdfUploaded) {
+                        <span class="text-xs text-amber-700">Review PDF first</span>
+                      } @else {
+                        <span class="text-xs text-muted">Upload PDF first</span>
+                      }
+
+                      @if (ebook.status === 'PUBLISHED' || ebook.status === 'UNPUBLISHED') {
+                        <button
+                          type="button"
+                          (click)="confirmSuspend(ebook)"
+                          [disabled]="suspendingEbookId() === ebook.id"
+                          class="text-xs font-semibold text-red-700 hover:underline disabled:opacity-50"
+                        >
+                          {{
+                            suspendingEbookId() === ebook.id ? 'Suspending...' : 'Suspend access'
+                          }}
+                        </button>
+                      }
+                    }
+                  </div>
                 </td>
               </tr>
             }
@@ -311,10 +385,198 @@
   </div>
 </div>
 
+<!-- PDF review modal -->
+@if (ebookToReview(); as ebook) {
+  <div
+    class="fixed inset-0 z-[55] flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm sm:p-6"
+    (click)="closePdfReview()"
+  >
+    <section
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pdf-review-title"
+      class="flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#faf9f6] shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Modal header -->
+      <div
+        class="flex items-start justify-between gap-4 border-b border-[#e8e5df] bg-white px-5 py-5 sm:px-7"
+      >
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#b58a45]">
+            Document verification
+          </p>
+          <h2 id="pdf-review-title" class="mt-2 font-display text-2xl text-[#252923]">
+            Review ebook PDF
+          </h2>
+          <p class="mt-1 text-sm text-[#77736c]">{{ ebook.title }}</p>
+        </div>
 
+        <button
+          type="button"
+          (click)="closePdfReview()"
+          aria-label="Close PDF review"
+          class="flex size-10 shrink-0 items-center justify-center rounded-full border border-[#e8e5df] text-xl text-[#77736c] transition hover:bg-[#faf9f6]"
+        >
+          ×
+        </button>
+      </div>
+
+      <!-- Modal content -->
+      <div class="min-h-0 flex-1 overflow-y-auto p-5 sm:p-7">
+        @if (reviewLoading()) {
+          <div class="flex min-h-64 flex-col items-center justify-center gap-4">
+            <div
+              class="size-10 animate-spin rounded-full border-4 border-[#e8e5df] border-t-[#b58a45]"
+            ></div>
+            <p class="text-sm text-[#77736c]">Loading PDF cover and preview pages...</p>
+          </div>
+        } @else if (reviewError()) {
+          <div class="rounded-xl border border-red-200 bg-red-50 p-5">
+            <p class="text-sm font-medium text-red-700">{{ reviewError() }}</p>
+            <button
+              type="button"
+              (click)="reviewPdf(ebook)"
+              class="mt-3 text-sm font-semibold text-red-700 hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        } @else {
+          <!-- Ebook information -->
+          <div class="mb-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div class="rounded-xl border border-[#e8e5df] bg-white p-4">
+              <p class="text-xs text-[#99958d]">Category</p>
+              <p class="mt-1 text-sm font-semibold text-[#252923]">
+                {{ ebook.categoryName }}
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-[#e8e5df] bg-white p-4">
+              <p class="text-xs text-[#99958d]">Price</p>
+              <p class="mt-1 text-sm font-semibold text-[#252923]">
+                {{ formatPrice(ebook.price, ebook.currency) }}
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-[#e8e5df] bg-white p-4">
+              <p class="text-xs text-[#99958d]">Pages</p>
+              <p class="mt-1 text-sm font-semibold text-[#252923]">
+                {{ ebook.pageCount ?? 'Not available' }}
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-[#e8e5df] bg-white p-4">
+              <p class="text-xs text-[#99958d]">Language</p>
+              <p class="mt-1 text-sm font-semibold text-[#252923]">
+                {{ ebook.language }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-8">
+            <h3 class="mb-2 text-sm font-semibold text-[#252923]">Description</h3>
+            <p class="whitespace-pre-line text-sm leading-7 text-[#77736c]">
+              {{ ebook.description || 'No description provided.' }}
+            </p>
+          </div>
+
+          <!-- Cover -->
+          <div class="mb-8">
+            <h3 class="mb-4 text-sm font-semibold text-[#252923]">Generated cover</h3>
+
+            @if (reviewCoverUrl(); as coverUrl) {
+              <div class="flex justify-center rounded-xl border border-[#e8e5df] bg-white p-5">
+                <img
+                  [src]="coverUrl"
+                  [alt]="ebook.title + ' PDF cover'"
+                  class="max-h-[420px] max-w-full rounded-md object-contain shadow-lg"
+                />
+              </div>
+            } @else {
+              <p class="text-sm text-red-600">Cover image is unavailable.</p>
+            }
+          </div>
+
+          <!-- Preview pages -->
+          <div>
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <h3 class="text-sm font-semibold text-[#252923]">PDF preview pages</h3>
+              <span class="text-xs text-[#99958d]">
+                {{ reviewPreviewImages().length }} preview pages
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              @for (preview of reviewPreviewImages(); track preview.pageNumber) {
+                <div class="overflow-hidden rounded-xl border border-[#e8e5df] bg-white">
+                  <div
+                    class="flex items-center justify-between border-b border-[#eeeae3] px-4 py-3"
+                  >
+                    <span class="text-xs font-semibold text-[#252923]">
+                      Page {{ preview.pageNumber }}
+                    </span>
+                    <span class="text-xs text-green-700">Preview</span>
+                  </div>
+
+                  <div class="flex min-h-64 items-center justify-center bg-[#f2f0eb] p-3">
+                    <img
+                      [src]="preview.imageUrl"
+                      [alt]="'Preview of page ' + preview.pageNumber"
+                      loading="lazy"
+                      class="max-h-[420px] max-w-full object-contain shadow-sm"
+                    />
+                  </div>
+                </div>
+              } @empty {
+                <p class="col-span-full rounded-lg bg-white p-5 text-sm text-[#77736c]">
+                  No preview pages are available.
+                </p>
+              }
+            </div>
+          </div>
+
+          <!-- Review confirmation -->
+          <div class="mt-8 rounded-xl border border-[#e8e5df] bg-white p-5">
+            <div class="flex items-start gap-3">
+              <span class="text-xl text-green-700">✓</span>
+              <div>
+                <p class="text-sm font-semibold text-[#252923]">PDF preview loaded successfully</p>
+                <p class="mt-1 text-xs leading-5 text-[#77736c]">
+                  Review the cover, page previews, and ebook information before proceeding to
+                  publication.
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Modal footer -->
+      <div
+        class="flex flex-col-reverse gap-3 border-t border-[#e8e5df] bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7"
+      >
+        <button
+          type="button"
+          (click)="closePdfReview()"
+          class="rounded-lg border border-[#e8e5df] px-5 py-3 text-sm font-semibold text-[#25231f] transition hover:bg-[#faf9f6]"
+        >
+          Close review
+        </button>
+
+        @if (reviewedEbookIds().has(ebook.id)) {
+          <span class="text-sm font-semibold text-green-700"> ✓ Review completed </span>
+        }
+      </div>
+    </section>
+  </div>
+}
+
+<!-- Unpublish confirmation -->
 @if (ebookToUnpublish(); as ebook) {
   <div
-    class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+    class="fixed inset-0 z-[65] flex items-center justify-center bg-black/50 p-4"
     (click)="cancelUnpublish()"
   >
     <section
@@ -328,21 +590,19 @@
         <span class="text-xl font-bold text-red-600">!</span>
       </div>
 
-      <h2
-        id="unpublish-modal-title"
-        class="font-display text-2xl font-semibold text-ink"
-      >
+      <h2 id="unpublish-modal-title" class="font-display text-2xl font-semibold text-ink">
         Unpublish Ebook?
       </h2>
 
       <p class="mt-3 text-sm leading-6 text-muted">
         Are you sure you want to unpublish
-        <strong class="text-ink">{{ ebook.title }}</strong>?
+        <strong class="text-ink">{{ ebook.title }}</strong
+        >?
       </p>
 
       <p class="mt-3 text-sm leading-6 text-muted">
-        This ebook will no longer appear in the public bookstore.
-        Its uploaded PDF will be retained, and you can publish it again later.
+        This ebook will no longer appear in the public bookstore. Its uploaded PDF will be retained,
+        and you can publish it again later.
       </p>
 
       @if (unpublishError()) {
@@ -368,6 +628,149 @@
           class="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
         >
           {{ unpublishingEbookId() !== null ? 'Unpublishing...' : 'Yes, Unpublish' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}
+
+<!-- Suspend confirmation -->
+@if (ebookToSuspend(); as ebook) {
+  <div
+    class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4"
+    (click)="cancelSuspend()"
+  >
+    <section
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="suspend-modal-title"
+      class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="mb-5 flex size-12 items-center justify-center rounded-full bg-red-50">
+        <span class="text-xl font-bold text-red-600">!</span>
+      </div>
+
+      <h2 id="suspend-modal-title" class="font-display text-2xl font-semibold text-ink">
+        Suspend ebook access?
+      </h2>
+
+      <p class="mt-3 text-sm leading-6 text-muted">
+        You are about to suspend
+        <strong class="text-ink">{{ ebook.title }}</strong
+        >.
+      </p>
+
+      <div class="mt-4 rounded-lg border border-red-100 bg-red-50 p-4">
+        <p class="text-sm font-semibold text-red-800">Important</p>
+        <p class="mt-1 text-sm leading-6 text-red-700">
+          New purchases will be blocked, and existing purchasers will temporarily lose download
+          access. Their purchase and library records will be retained.
+        </p>
+      </div>
+
+      <label for="suspension-reason" class="mt-5 block text-sm font-semibold text-ink">
+        Reason for suspension
+      </label>
+
+      <textarea
+        id="suspension-reason"
+        rows="4"
+        maxlength="1000"
+        [value]="suspensionReason()"
+        (input)="suspensionReason.set($any($event.target).value)"
+        placeholder="Explain why this ebook needs to be suspended..."
+        class="mt-2 w-full resize-y rounded-lg border border-border bg-white p-3 text-sm text-ink outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
+      ></textarea>
+
+      <p class="mt-1 text-right text-xs text-muted">
+        {{ suspensionReason().length }}/1000 characters
+      </p>
+
+      @if (suspendError()) {
+        <div role="alert" class="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          {{ suspendError() }}
+        </div>
+      }
+
+      <div class="mt-7 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="cancelSuspend()"
+          [disabled]="suspendingEbookId() !== null"
+          class="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink hover:bg-paper disabled:opacity-50"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          (click)="suspendEbook()"
+          [disabled]="!suspensionReason().trim() || suspendingEbookId() !== null"
+          class="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {{ suspendingEbookId() !== null ? 'Suspending...' : 'Confirm suspension' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}
+
+<!-- Restore confirmation -->
+@if (ebookToRestore(); as ebook) {
+  <div
+    class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4"
+    (click)="cancelRestore()"
+  >
+    <section
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="restore-modal-title"
+      class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="mb-5 flex size-12 items-center justify-center rounded-full bg-green-50">
+        <span class="text-xl font-bold text-green-700">✓</span>
+      </div>
+
+      <h2 id="restore-modal-title" class="font-display text-2xl font-semibold text-ink">
+        Restore ebook?
+      </h2>
+
+      <p class="mt-3 text-sm leading-6 text-muted">
+        Are you sure you want to restore
+        <strong class="text-ink">{{ ebook.title }}</strong
+        >?
+      </p>
+
+      <p class="mt-3 text-sm leading-6 text-muted">
+        The ebook will return to its previous status. If it was unpublished before suspension, it
+        will remain unpublished and will not become available for new purchases.
+      </p>
+
+      @if (restoreError()) {
+        <div role="alert" class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          {{ restoreError() }}
+        </div>
+      }
+
+      <div class="mt-7 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="cancelRestore()"
+          [disabled]="restoringEbookId() !== null"
+          class="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink hover:bg-paper disabled:opacity-50"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          (click)="restoreEbook()"
+          [disabled]="restoringEbookId() !== null"
+          class="rounded-lg bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800 disabled:opacity-50"
+        >
+          {{ restoringEbookId() !== null ? 'Restoring...' : 'Confirm restore' }}
         </button>
       </div>
     </section>

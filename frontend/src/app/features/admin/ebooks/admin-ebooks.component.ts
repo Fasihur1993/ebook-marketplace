@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
-
-import { Ebook } from '../../../core/models/ebook.model';
-import { AdminEbookApiService } from '../services/admin-ebook-api.service';
+import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { Ebook, EbookPreviewImage } from '../../../core/models/ebook.model';
+import { AdminEbookApiService } from '../services/admin-ebook-api.service';
 
 @Component({
   selector: 'app-admin-ebooks',
@@ -13,8 +14,9 @@ import { finalize } from 'rxjs';
   templateUrl: './admin-ebooks.component.html',
   styleUrl: './admin-ebooks.component.scss',
 })
-export class AdminEbooksComponent implements OnInit {
+export class AdminEbooksComponent implements OnInit, OnDestroy {
   private readonly ebookApi = inject(AdminEbookApiService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly ebooks = signal<Ebook[]>([]);
   readonly loading = signal(false);
@@ -40,8 +42,33 @@ export class AdminEbooksComponent implements OnInit {
 
   readonly ebookToPublish = signal<Ebook | null>(null);
 
+  readonly suspendingEbookId = signal<number | null>(null);
+  readonly suspendError = signal('');
+  readonly suspendSuccess = signal('');
+  readonly ebookToSuspend = signal<Ebook | null>(null);
+  readonly suspensionReason = signal('');
+
+  readonly restoringEbookId = signal<number | null>(null);
+  readonly restoreError = signal('');
+  readonly restoreSuccess = signal('');
+  readonly ebookToRestore = signal<Ebook | null>(null);
+
+  // PDF review state
+  readonly ebookToReview = signal<Ebook | null>(null);
+  readonly reviewLoading = signal(false);
+  readonly reviewError = signal('');
+  readonly reviewCoverUrl = signal<string | null>(null);
+  readonly reviewPreviewImages = signal<{ pageNumber: number; imageUrl: string }[]>([]);
+  readonly reviewedEbookIds = signal<Set<number>>(new Set());
+
+  private readonly reviewObjectUrls = new Set<string>();
+
   ngOnInit(): void {
     this.loadEbooks();
+  }
+
+  ngOnDestroy(): void {
+    this.releaseReviewObjectUrls();
   }
 
   loadEbooks(page: number = 0): void {
@@ -140,8 +167,96 @@ export class AdminEbooksComponent implements OnInit {
       });
   }
 
+  // PDF review
+  reviewPdf(ebook: Ebook): void {
+    if (!ebook.pdfUploaded) {
+      return;
+    }
+
+    this.closePdfReview();
+
+    this.ebookToReview.set(ebook);
+    this.reviewLoading.set(true);
+    this.reviewError.set('');
+
+    forkJoin({
+      cover: this.ebookApi.getCoverImage(ebook.id),
+      previews: this.ebookApi.getPreviewImages(ebook.id),
+    })
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.reviewLoading.set(false)),
+      )
+      .subscribe({
+        next: ({ cover, previews }) => {
+          if (!previews.success || !previews.data) {
+            this.reviewError.set(previews.message || 'Unable to load PDF previews.');
+            return;
+          }
+
+          this.reviewCoverUrl.set(this.createObjectUrl(cover));
+
+          const sortedPreviews = [...previews.data].sort((a, b) => a.pageNumber - b.pageNumber);
+
+          const previewRequests = sortedPreviews.map((preview) =>
+            this.ebookApi.getPreviewImage(ebook.id, preview.pageNumber),
+          );
+
+          if (previewRequests.length === 0) {
+            this.reviewError.set('No preview pages were generated.');
+            return;
+          }
+
+          forkJoin(previewRequests)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (images) => {
+                this.reviewPreviewImages.set(
+                  images.map((image, index) => ({
+                    pageNumber: sortedPreviews[index].pageNumber,
+                    imageUrl: this.createObjectUrl(image),
+                  })),
+                );
+                this.reviewedEbookIds.update((ids) => new Set(ids).add(ebook.id));
+              },
+              error: () => {
+                this.reviewError.set('Unable to load one or more PDF preview pages.');
+              },
+            });
+        },
+        error: () => {
+          this.reviewError.set('Unable to load the PDF review. Please try again.');
+        },
+      });
+  }
+
+  closePdfReview(): void {
+    this.releaseReviewObjectUrls();
+
+    this.ebookToReview.set(null);
+    this.reviewCoverUrl.set(null);
+    this.reviewPreviewImages.set([]);
+    this.reviewError.set('');
+    this.reviewLoading.set(false);
+  }
+
+  private createObjectUrl(blob: Blob): string {
+    const url = URL.createObjectURL(blob);
+    this.reviewObjectUrls.add(url);
+    return url;
+  }
+
+  private releaseReviewObjectUrls(): void {
+    this.reviewObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+    this.reviewObjectUrls.clear();
+  }
+
   confirmPublish(ebook: Ebook): void {
-    if (!ebook.pdfUploaded || ebook.status === 'PUBLISHED') {
+    if (
+      !ebook.pdfUploaded ||
+      ebook.status === 'PUBLISHED' ||
+      !this.reviewedEbookIds().has(ebook.id)
+    ) {
       return;
     }
 
@@ -161,7 +276,12 @@ export class AdminEbooksComponent implements OnInit {
   publishEbook(): void {
     const ebook = this.ebookToPublish();
 
-    if (!ebook || !ebook.pdfUploaded || this.publishingEbookId() !== null) {
+    if (
+      !ebook ||
+      !ebook.pdfUploaded ||
+      !this.reviewedEbookIds().has(ebook.id) ||
+      this.publishingEbookId() !== null
+    ) {
       return;
     }
 
@@ -221,24 +341,140 @@ export class AdminEbooksComponent implements OnInit {
     this.unpublishError.set('');
     this.unpublishSuccess.set('');
 
-    this.ebookApi.unpublishEbook(ebook.id).subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.ebooks.update((ebooks) =>
-            ebooks.map((item) => (item.id === ebook.id ? response.data! : item)),
-          );
-        }
+    this.ebookApi
+      .unpublishEbook(ebook.id)
+      .pipe(finalize(() => this.unpublishingEbookId.set(null)))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.ebooks.update((ebooks) =>
+              ebooks.map((item) => (item.id === ebook.id ? response.data! : item)),
+            );
 
-        this.unpublishingEbookId.set(null);
-        this.ebookToUnpublish.set(null);
-        this.unpublishSuccess.set(`${ebook.title} has been unpublished successfully.`);
-      },
-      error: (error) => {
-        this.unpublishingEbookId.set(null);
-        this.unpublishError.set(
-          error.error?.message ?? 'Unable to unpublish ebook. Please try again.',
-        );
-      },
-    });
+            this.unpublishSuccess.set(`${ebook.title} has been unpublished successfully.`);
+          } else {
+            this.unpublishError.set(response.message || 'Unable to unpublish ebook.');
+          }
+
+          this.ebookToUnpublish.set(null);
+        },
+        error: (error) => {
+          this.unpublishError.set(
+            error.error?.message ?? 'Unable to unpublish ebook. Please try again.',
+          );
+        },
+      });
+  }
+
+  confirmSuspend(ebook: Ebook): void {
+    if (ebook.status !== 'PUBLISHED' && ebook.status !== 'UNPUBLISHED') {
+      return;
+    }
+
+    this.suspendError.set('');
+    this.suspendSuccess.set('');
+    this.suspensionReason.set('');
+    this.ebookToSuspend.set(ebook);
+  }
+
+  cancelSuspend(): void {
+    if (this.suspendingEbookId() !== null) {
+      return;
+    }
+
+    this.ebookToSuspend.set(null);
+    this.suspensionReason.set('');
+    this.suspendError.set('');
+  }
+
+  suspendEbook(): void {
+    const ebook = this.ebookToSuspend();
+    const reason = this.suspensionReason().trim();
+
+    if (!ebook || !reason || this.suspendingEbookId() !== null) {
+      return;
+    }
+
+    this.suspendError.set('');
+    this.suspendSuccess.set('');
+    this.suspendingEbookId.set(ebook.id);
+
+    this.ebookApi
+      .suspendEbook(ebook.id, reason)
+      .pipe(finalize(() => this.suspendingEbookId.set(null)))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.ebooks.update((ebooks) =>
+              ebooks.map((item) => (item.id === ebook.id ? response.data! : item)),
+            );
+
+            this.suspendSuccess.set(`"${ebook.title}" has been suspended successfully.`);
+            this.ebookToSuspend.set(null);
+            this.suspensionReason.set('');
+          } else {
+            this.suspendError.set(response.message || 'Unable to suspend ebook.');
+          }
+        },
+        error: (error) => {
+          this.suspendError.set(
+            error.error?.message || 'Unable to suspend ebook. Please try again.',
+          );
+        },
+      });
+  }
+
+  confirmRestore(ebook: Ebook): void {
+    if (ebook.status !== 'SUSPENDED') {
+      return;
+    }
+
+    this.restoreError.set('');
+    this.restoreSuccess.set('');
+    this.ebookToRestore.set(ebook);
+  }
+
+  cancelRestore(): void {
+    if (this.restoringEbookId() !== null) {
+      return;
+    }
+
+    this.ebookToRestore.set(null);
+    this.restoreError.set('');
+  }
+
+  restoreEbook(): void {
+    const ebook = this.ebookToRestore();
+
+    if (!ebook || this.restoringEbookId() !== null) {
+      return;
+    }
+
+    this.restoreError.set('');
+    this.restoreSuccess.set('');
+    this.restoringEbookId.set(ebook.id);
+
+    this.ebookApi
+      .restoreEbook(ebook.id)
+      .pipe(finalize(() => this.restoringEbookId.set(null)))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.ebooks.update((ebooks) =>
+              ebooks.map((item) => (item.id === ebook.id ? response.data! : item)),
+            );
+
+            this.restoreSuccess.set(`"${ebook.title}" has been restored successfully.`);
+            this.ebookToRestore.set(null);
+          } else {
+            this.restoreError.set(response.message || 'Unable to restore ebook.');
+          }
+        },
+        error: (error) => {
+          this.restoreError.set(
+            error.error?.message || 'Unable to restore ebook. Please try again.',
+          );
+        },
+      });
   }
 }

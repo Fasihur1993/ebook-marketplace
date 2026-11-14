@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
 
+import com.ebookmarketplace.backend.dto.SuspendEbookRequest;
+import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+
 @RestController
 @RequestMapping("/api/v1/admin/ebooks")
 public class AdminEbookController {
@@ -94,4 +99,33 @@ public class AdminEbookController {
                 return ResponseEntity.ok(
                                 ApiResponse.success("Ebook unpublished successfully", response));
         }
+
+        @PostMapping("/{id}/suspend")
+        public ResponseEntity<ApiResponse<EbookResponse>> suspendEbook(
+                        @PathVariable Long id,
+                        @Valid @RequestBody SuspendEbookRequest request,
+                        @AuthenticationPrincipal Jwt jwt) {
+
+                EbookResponse response = ebookService.suspendEbook(
+                                id,
+                                request.reason(),
+                                jwt.getSubject());
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("Ebook suspended successfully", response));
+        }
+
+        @PostMapping("/{id}/restore")
+        public ResponseEntity<ApiResponse<EbookResponse>> restoreEbook(
+                        @PathVariable Long id,
+                        @AuthenticationPrincipal Jwt jwt) {
+
+                EbookResponse response = ebookService.restoreEbook(
+                                id,
+                                jwt.getSubject());
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("Ebook restored successfully", response));
+        }
+
 }

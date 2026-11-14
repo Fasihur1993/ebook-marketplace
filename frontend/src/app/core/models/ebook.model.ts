@@ -1,20 +1,4 @@
-export interface Ebook {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  price: number;
-  currency: string;
-  categoryId: number;
-  categoryName: string;
-  authorId: number;
-  pageCount: number | null;
-  language: string;
-  status: string;
-  pdfUploaded: boolean;
-  publishedAt: string | null;
-  createdAt: string;
-}
+export type EbookStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED' | 'SUSPENDED';
 
 export interface Ebook {
   id: number;
@@ -28,7 +12,7 @@ export interface Ebook {
   authorId: number;
   pageCount: number | null;
   language: string;
-  status: string;
+  status: EbookStatus;
   pdfUploaded: boolean;
   publishedAt: string | null;
   createdAt: string;

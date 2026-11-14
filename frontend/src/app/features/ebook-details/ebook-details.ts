@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
 import { catchError, EMPTY, of, switchMap } from 'rxjs';
 
 import { EbookApiService } from '../../core/services/ebook-api.service';
+import { CartService } from '../../core/services/cart.service';
 import { Ebook, EbookPreviewImage } from '../../core/models/ebook.model';
 import { StoreHeaderComponent } from '../../shared/components/store-header/store-header.component';
 
@@ -21,22 +21,20 @@ export class EbookDetailsComponent implements OnInit {
   private readonly ebookApi = inject(EbookApiService);
   private readonly destroyRef = inject(DestroyRef);
 
+  readonly cart = inject(CartService);
+
   readonly ebook = signal<Ebook | null>(null);
   readonly loading = signal(true);
   readonly error = signal('');
-
   readonly coverLoading = signal(true);
   readonly coverError = signal(false);
-
   readonly previews = signal<EbookPreviewImage[]>([]);
   readonly previewsLoading = signal(false);
   readonly previewsError = signal(false);
-
   readonly selectedPreview = signal<EbookPreviewImage | null>(null);
 
   readonly coverUrl = computed(() => {
     const book = this.ebook();
-
     return book ? this.ebookApi.getEbookCoverUrl(book.id) : '';
   });
 
@@ -73,9 +71,7 @@ export class EbookDetailsComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((response) => {
-        if (!response) {
-          return;
-        }
+        if (!response) return;
 
         if (!response.success || !response.data) {
           this.error.set(response.message || 'Ebook not found.');
@@ -84,12 +80,18 @@ export class EbookDetailsComponent implements OnInit {
         }
 
         const book = response.data;
-
         this.ebook.set(book);
         this.loading.set(false);
-
         this.loadPreviews(book.id);
       });
+  }
+
+  addToCart(): void {
+    const book = this.ebook();
+
+    if (!book) return;
+
+    this.cart.addEbook(book);
   }
 
   private loadPreviews(ebookId: number): void {
@@ -108,9 +110,7 @@ export class EbookDetailsComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((response) => {
-        if (!response) {
-          return;
-        }
+        if (!response) return;
 
         if (!response.success || !response.data) {
           this.previewsError.set(true);

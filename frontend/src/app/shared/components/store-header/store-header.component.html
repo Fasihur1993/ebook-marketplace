@@ -1,47 +1,88 @@
 <header class="store-header">
-    <div class="header-container">
-        <a class="brand" routerLink="/" (click)="closeMobileMenu()">
-            <span class="brand-mark">E</span>
-            <span class="brand-name">Ebook Marketplace</span>
+  <div class="header-container">
+    <a class="brand" routerLink="/" (click)="closeMobileMenu()">
+      <span class="brand-mark">E</span>
+      <span class="brand-name">Ebook Marketplace</span>
+    </a>
+
+    <button
+      type="button"
+      class="mobile-menu-button"
+      aria-label="Toggle navigation"
+      [attr.aria-expanded]="isMobileMenuOpen()"
+      (click)="toggleMobileMenu()"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="desktop-navigation" aria-label="Main navigation">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        Discover
+      </a>
+
+      @if (isAuthenticated() && !isAdmin()) {
+        <a routerLink="/account/orders" routerLinkActive="active"> My Orders </a>
+
+        <a routerLink="/account/library" routerLinkActive="active"> My Library </a>
+      }
+
+      @if (isAdmin()) {
+        <a routerLink="/admin" routerLinkActive="active"> Dashboard </a>
+      }
+    </nav>
+
+    <div class="desktop-actions">
+      @if (!isAdmin()) {
+        <a
+          routerLink="/cart"
+          class="cart-link"
+          routerLinkActive="active"
+          aria-label="Shopping cart"
+        >
+          <span>Cart</span>
+          @if (cart.itemCount() > 0) {
+            <span class="cart-count">{{ cart.itemCount() }}</span>
+          }
         </a>
+      }
+      @if (isAuthenticated()) {
+        <a class="account-link" routerLink="/account"> My Account </a>
 
-        <button type="button" class="mobile-menu-button" aria-label="Toggle navigation"
-            [attr.aria-expanded]="isMobileMenuOpen()" (click)="toggleMobileMenu()">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button type="button" class="logout-button" (click)="logout()">Sign out</button>
+      } @else {
+        <a class="login-link" routerLink="/login"> Log in </a>
 
-        <nav class="desktop-navigation">
-            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-                Discover
-            </a>
-        </nav>
-
-        <div class="desktop-actions">
-            @if (isAuthenticated()) {
-            <a class="account-link" routerLink="/account">My Account</a>
-            <button type="button" class="logout-button" (click)="logout()">
-                Sign out
-            </button>
-            } @else {
-            <a class="login-link" routerLink="/login">Log in</a>
-            <a class="register-button" routerLink="/register">Create account</a>
-            }
-        </div>
+        <a class="register-button" routerLink="/register"> Create account </a>
+      }
     </div>
+  </div>
 
-    @if (isMobileMenuOpen()) {
-    <nav class="mobile-navigation">
-        <a routerLink="/" (click)="closeMobileMenu()">Discover</a>
+  @if (isMobileMenuOpen()) {
+    <nav class="mobile-navigation" aria-label="Mobile navigation">
+      <a routerLink="/" (click)="closeMobileMenu()">Discover</a>
 
-        @if (isAuthenticated()) {
+      @if (!isAdmin()) {
+        <a routerLink="/cart" (click)="closeMobileMenu()"> Cart ({{ cart.itemCount() }}) </a>
+      }
+
+      @if (isAuthenticated() && !isAdmin()) {
         <a routerLink="/account" (click)="closeMobileMenu()">My Account</a>
+        <a routerLink="/account/orders" (click)="closeMobileMenu()">My Orders</a>
+        <a routerLink="/account/library" (click)="closeMobileMenu()">My Library</a>
+      }
+
+      @if (isAdmin()) {
+        <a routerLink="/admin" (click)="closeMobileMenu()">Dashboard</a>
+      }
+
+      @if (isAuthenticated()) {
         <button type="button" (click)="logout()">Sign out</button>
-        } @else {
+      } @else {
         <a routerLink="/login" (click)="closeMobileMenu()">Log in</a>
         <a routerLink="/register" (click)="closeMobileMenu()">Create account</a>
-        }
+      }
     </nav>
-    }
+  }
 </header>

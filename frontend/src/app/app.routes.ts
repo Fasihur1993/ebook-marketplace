@@ -16,6 +16,8 @@ import { roleGuard } from './core/guards/role.guard';
 import { CategoryManagementComponent } from './features/admin/categories/category-management.component';
 import { CustomerOrdersComponent } from './features/account/orders/customer-orders.component';
 import { AdminPaymentsComponent } from './features/payments/admin-payments.component';
+import { CartComponent } from './features/cart/cart.component';
+import { MyLibraryComponent } from './features/account/library/my-library.component';
 
 export const routes: Routes = [
   {
@@ -46,6 +48,13 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['CUSTOMER', 'ADMIN'] },
   },
+  {
+    path: 'account/library',
+    component: MyLibraryComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['CUSTOMER'] },
+  },
+  { path: 'cart', component: CartComponent },
   {
     path: 'admin',
     component: AdminLayoutComponent,

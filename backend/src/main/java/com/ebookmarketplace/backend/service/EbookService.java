@@ -535,4 +535,39 @@ public class EbookService {
 
                 return toResponse(savedEbook);
         }
+
+        @Transactional
+        public EbookResponse suspendEbook(Long ebookId, String reason, String adminEmail) {
+                var ebook = ebookRepository.findById(ebookId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Ebook not found with id: " + ebookId));
+
+                var admin = userRepository.findByEmail(adminEmail)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Admin user not found"));
+
+                ebook.suspend(reason, admin);
+
+                var savedEbook = ebookRepository.save(ebook);
+
+                return toResponse(savedEbook);
+        }
+
+        @Transactional
+        public EbookResponse restoreEbook(Long ebookId, String adminEmail) {
+                var ebook = ebookRepository.findById(ebookId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Ebook not found with id: " + ebookId));
+
+                var admin = userRepository.findByEmail(adminEmail)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Admin user not found"));
+
+                ebook.restore(admin);
+
+                var savedEbook = ebookRepository.save(ebook);
+
+                return toResponse(savedEbook);
+        }
+
 }

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { API_BASE_URL } from '../config/api.config';
 import { ApiResponse } from '../models/api-response.model';
-import { CustomerOrder, SpringPage } from '../models/customer-order.model';
+import { CreateOrderResponse, CustomerOrder, SpringPage } from '../models/customer-order.model';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +13,7 @@ export class CustomerOrderApiService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl = `${API_BASE_URL}/me/orders`;
+  private readonly ordersApiUrl = `${API_BASE_URL}/orders`;
 
   getOrders(
     page: number = 0,
@@ -21,5 +22,9 @@ export class CustomerOrderApiService {
     const params = new HttpParams().set('page', page).set('size', size);
 
     return this.http.get<ApiResponse<SpringPage<CustomerOrder>>>(this.apiUrl, { params });
+  }
+
+  createOrder(ebookIds: number[]): Observable<ApiResponse<CreateOrderResponse>> {
+    return this.http.post<ApiResponse<CreateOrderResponse>>(this.ordersApiUrl, { ebookIds });
   }
 }

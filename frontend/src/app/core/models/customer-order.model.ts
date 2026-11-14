@@ -38,6 +38,32 @@ export interface CustomerOrder {
   paidAt: string | null;
 }
 
+/**
+ * Payment returned immediately when a new order is created.
+ */
+export interface CreateOrderPaymentResponse {
+  paymentId: number;
+  paymentMethod: PaymentMethod;
+  status: PaymentStatus;
+  amount: number;
+  currency: string;
+  transactionReference: string | null;
+  submittedAt: string | null;
+}
+
+/**
+ * Response from POST /api/v1/orders.
+ */
+export interface CreateOrderResponse {
+  orderId: number;
+  totalAmount: number;
+  currency: string;
+  status: OrderStatus;
+  items: CustomerOrderItem[];
+  payment: CreateOrderPaymentResponse;
+  createdAt: string;
+}
+
 export interface SpringPage<T> {
   content: T[];
   empty: boolean;

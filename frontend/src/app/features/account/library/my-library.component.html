@@ -1,0 +1,179 @@
+<app-store-header />
+
+<main class="min-h-screen bg-[#faf9f6] px-4 py-10 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl">
+
+    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="mb-2 text-xs font-semibold tracking-[0.2em] text-[#98784c]">
+          YOUR COLLECTION
+        </p>
+
+        <h1 class="text-3xl font-semibold tracking-tight text-[#252923] sm:text-4xl">
+          My Library
+        </h1>
+
+        <p class="mt-2 text-sm text-[#77766e]">
+          Your purchased ebooks, ready whenever you are.
+        </p>
+      </div>
+
+      <a
+        routerLink="/"
+        class="inline-flex w-fit items-center gap-2 rounded-lg border border-[#e5dfd3] px-4 py-2.5 text-sm font-medium text-[#554b3d] transition hover:bg-white"
+      >
+        <span aria-hidden="true">←</span>
+        Browse bookstore
+      </a>
+    </div>
+
+    @if (loading()) {
+      <div class="rounded-2xl border border-[#e9e5dc] bg-white px-6 py-20 text-center">
+        <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#e8e1d5] border-t-[#8c6d3f]"></div>
+        <p class="text-sm text-[#77766e]">Loading your library...</p>
+      </div>
+    } @else if (error()) {
+      <div class="rounded-2xl border border-red-200 bg-red-50 px-6 py-10 text-center">
+        <p class="font-medium text-red-800">{{ error() }}</p>
+
+        <button
+          type="button"
+          (click)="loadLibrary(currentPage())"
+          class="mt-5 rounded-lg bg-[#8c6d3f] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#755a33]"
+        >
+          Try again
+        </button>
+      </div>
+    } @else if (ebooks().length === 0) {
+      <section class="rounded-2xl border border-[#e9e5dc] bg-white px-6 py-20 text-center">
+        <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#f5f1e9] text-2xl text-[#8c6d3f]">
+          <span aria-hidden="true">▤</span>
+        </div>
+
+        <h2 class="text-xl font-semibold text-[#252923]">
+          Your library is waiting
+        </h2>
+
+        <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-[#77766e]">
+          Once you purchase an ebook, it will appear here. You can then access
+          and download it whenever you need it.
+        </p>
+
+        <a
+          routerLink="/"
+          class="mt-7 inline-flex rounded-lg bg-[#8c6d3f] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#755a33]"
+        >
+          Explore ebooks
+        </a>
+      </section>
+    } @else {
+      <div class="mb-5 flex items-center justify-between">
+        <p class="text-sm text-[#77766e]">
+          <span class="font-semibold text-[#252923]">{{ totalElements() }}</span>
+          {{ totalElements() === 1 ? 'ebook' : 'ebooks' }} in your library
+        </p>
+      </div>
+
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        @for (ebook of ebooks(); track ebook.ebookId) {
+          <article class="flex flex-col overflow-hidden rounded-2xl border border-[#e9e5dc] bg-white transition hover:border-[#d8cbb7] hover:shadow-sm">
+            <div class="flex min-h-44 items-center justify-center bg-[#f3efe7] px-6 py-8">
+              <div class="flex h-28 w-20 items-center justify-center rounded-md border border-[#d9cbb5] bg-white shadow-md">
+                <div class="px-2 text-center">
+                  <span class="text-2xl text-[#98784c]" aria-hidden="true">▤</span>
+                  <p class="mt-2 line-clamp-3 text-[9px] font-semibold leading-3 text-[#554b3d]">
+                    {{ ebook.title }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-1 flex-col p-5">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <span class="rounded-full bg-[#f2eee5] px-3 py-1 text-[10px] font-semibold tracking-wider text-[#80643c]">
+                  PDF EBOOK
+                </span>
+
+                <span class="text-xs text-[#969188]">
+                  {{ ebook.language }}
+                </span>
+              </div>
+
+              <h2 class="text-lg font-semibold leading-snug text-[#252923]">
+                {{ ebook.title }}
+              </h2>
+
+              <p class="mt-2 line-clamp-3 text-sm leading-6 text-[#77766e]">
+                {{ ebook.description }}
+              </p>
+
+              <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#88847b]">
+                @if (ebook.pageCount) {
+                  <span>{{ ebook.pageCount }} pages</span>
+                }
+
+                <span>Purchased {{ formatDate(ebook.purchasedAt) }}</span>
+              </div>
+
+              <div class="mt-auto pt-5">
+                <div class="mb-4 flex items-center justify-between border-t border-[#f0ede7] pt-4">
+                  <span class="text-xs text-[#88847b]">Purchase price</span>
+                  <span class="font-semibold text-[#252923]">
+                    {{ ebook.currency }} {{ ebook.price | number:'1.2-2' }}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  [disabled]="downloadingIds().has(ebook.ebookId)"
+                  (click)="downloadEbook(ebook)"
+                  class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#8c6d3f] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#755a33] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  @if (downloadingIds().has(ebook.ebookId)) {
+                    <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    Preparing download...
+                  } @else {
+                    <span aria-hidden="true">↓</span>
+                    Download PDF
+                  }
+                </button>
+
+                @if (downloadErrors()[ebook.ebookId]) {
+                  <p class="mt-3 text-xs leading-5 text-red-600">
+                    {{ downloadErrors()[ebook.ebookId] }}
+                  </p>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="mt-9 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            [disabled]="currentPage() === 0"
+            (click)="goToPage(currentPage() - 1)"
+            class="rounded-lg border border-[#e5dfd3] px-4 py-2 text-sm font-medium text-[#554b3d] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Previous
+          </button>
+
+          <span class="text-sm text-[#77766e]">
+            Page {{ currentPage() + 1 }} of {{ totalPages() }}
+          </span>
+
+          <button
+            type="button"
+            [disabled]="currentPage() >= totalPages() - 1"
+            (click)="goToPage(currentPage() + 1)"
+            class="rounded-lg border border-[#e5dfd3] px-4 py-2 text-sm font-medium text-[#554b3d] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      }
+    }
+  </div>
+</main>

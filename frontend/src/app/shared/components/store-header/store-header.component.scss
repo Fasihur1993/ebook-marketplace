@@ -83,7 +83,7 @@
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
-    transition: background 160ms ease;
+    transition: background 160ms ease;  
 }
 
 .register-button:hover,
@@ -168,4 +168,34 @@
     .mobile-navigation button:last-child {
         border-bottom: 0;
     }
+}
+
+.cart-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #624a28;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 160ms ease;
+}
+
+.cart-link:hover,
+.cart-link.active {
+    color: #a88754;
+}
+
+.cart-count {
+    display: inline-flex;
+    min-width: 20px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #8c6d3f;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
 }

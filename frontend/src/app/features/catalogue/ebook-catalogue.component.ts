@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { EbookApiService } from '../../core/services/ebook-api.service';
+import { CartService } from '../../core/services/cart.service';
 import { Ebook } from '../../core/models/ebook.model';
 import { StoreHeaderComponent } from '../../shared/components/store-header/store-header.component';
 
@@ -17,6 +18,8 @@ import { StoreHeaderComponent } from '../../shared/components/store-header/store
 export class EbookCatalogueComponent implements OnInit {
   private readonly ebookApi = inject(EbookApiService);
 
+  readonly cart = inject(CartService);
+
   readonly ebooks = signal<Ebook[]>([]);
   readonly loading = signal(false);
   readonly error = signal('');
@@ -28,7 +31,6 @@ export class EbookCatalogueComponent implements OnInit {
 
   readonly searchTerm = signal('');
 
-  // Tracks ebooks whose cover image could not be loaded.
   readonly failedCoverIds = signal<Set<number>>(new Set());
 
   ngOnInit(): void {
@@ -59,13 +61,15 @@ export class EbookCatalogueComponent implements OnInit {
         },
         error: (error) => {
           console.error('Failed to load ebooks:', error);
-
           this.error.set('Unable to connect to the bookstore. Please try again.');
-
           this.ebooks.set([]);
           this.loading.set(false);
         },
       });
+  }
+
+  addToCart(ebook: Ebook): void {
+    this.cart.addEbook(ebook);
   }
 
   ebookCoverUrl(ebookId: number): string {
